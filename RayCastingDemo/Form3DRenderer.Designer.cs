@@ -1,5 +1,5 @@
 ﻿namespace RayCastingDemo {
-    partial class FormMain {
+    partial class Form3DRenderer {
         /// <summary>
         /// Required designer variable.
         /// </summary>
@@ -25,16 +25,13 @@
         private void InitializeComponent() {
             this.SuspendLayout();
             // 
-            // FormMain
+            // FormRenderer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(784, 761);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.MaximizeBox = false;
-            this.Name = "FormMain";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "RayCasting Demo (2D Scene)";
+            this.Name = "FormRenderer";
+            this.Text = "RayCasting Demo (3D Scene)";
             this.ResumeLayout(false);
 
         }
@@ -42,4 +39,3 @@
         #endregion
     }
 }
-

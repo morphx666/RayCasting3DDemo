@@ -62,6 +62,8 @@ namespace RayCastingDemo {
                             minD = d;
                             minV = ray;
                             minV.Color = w.Color;
+                            w.Tag = 0.0; // bmpOffset
+                            minV.Tag = w;
                         }
                     }
                 }

@@ -24,6 +24,8 @@ namespace RayCastingDemo {
         public delegate void ChangedEventHandler(object sender, EventArgs e);
         public event ChangedEventHandler Changed;
 
+        public object Tag { get; set; }
+
         public Vector() {
             mAngle = 0.0;
             mMagnitude = 1.0;
