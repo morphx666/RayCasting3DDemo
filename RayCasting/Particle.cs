@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace RayCastingDemo {
+namespace RayCasting {
     public class Particle : Vector {
         private readonly List<Vector> mRays = new List<Vector>();
         private double mFOV = 170.0;

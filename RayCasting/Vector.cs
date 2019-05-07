@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace RayCastingDemo {
+namespace RayCasting {
     public class Vector {
         public const double ToRad = Math.PI / 180.0;
         public const double ToDeg = 180.0 / Math.PI;

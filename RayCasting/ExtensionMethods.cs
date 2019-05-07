@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace RayCastingDemo {
+namespace RayCasting {
     public static class ExtensionMethods {
         public static void DrawLine(this Graphics g, Pen p, double x1, double y1, double x2, double y2) {
             g.DrawLine(p, (float)x1, (float)y1, (float)x2, (float)y2);
@@ -24,7 +21,7 @@ namespace RayCastingDemo {
         }
 
         public static void DrawImage(this Graphics g, Bitmap bmp, double x, double y, double width, double height) {
-            g.DrawImage(Properties.Resources.WallBmp, (float)x, (float)y, (float)width, (float)height);
+            g.DrawImage(bmp, (float)x, (float)y, (float)width, (float)height);
         }
 
         public static void CreateRectangle(this List<Vector> v, double x, double y, double width, double height) {
