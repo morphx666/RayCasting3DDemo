@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -12,20 +13,20 @@ using System.Windows.Forms;
 
 namespace RayCastingDemo {
     public partial class FormRenderer : Form {
-        private readonly Viewer viewer;
+        private readonly Particle camera;
         private readonly List<Vector> walls;
-        private readonly List<Vector> rays;
+        private readonly List<Particle> lights;
 
-        public FormRenderer(Viewer viewer, List<Vector> walls, List<Vector> rays) {
+        public FormRenderer(Particle viewer, List<Vector> walls, List<Particle> lights) {
             InitializeComponent();
 
             this.SetStyle(ControlStyles.AllPaintingInWmPaint |
                           ControlStyles.OptimizedDoubleBuffer |
                           ControlStyles.UserPaint, true);
 
-            this.viewer = viewer;
+            this.camera = viewer;
             this.walls = walls;
-            this.rays = rays;
+            this.lights = lights;
 
             this.Paint += RenderScene;
         }
@@ -34,47 +35,47 @@ namespace RayCastingDemo {
             Graphics g = e.Graphics;
 
             g.Clear(Color.Black);
-            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
-            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
 
-            lock(viewer) {
-                if(rays.Count == 0) return;
+            lock(camera) {
+                if(camera.Rays.Count == 0) return;
 
                 Rectangle r = this.DisplayRectangle;
                 double x;
                 double y;
                 double p;
                 int alpha;
-                double rw = Math.Ceiling((double)r.Width / rays.Count);
-
-                //double minA = rays.Min((ray) => ray.Angle);
-                //double maxA = rays.Max((ray) => ray.Angle);
-                //double minM = 0;
+                double rw = Math.Ceiling((double)r.Width / camera.Rays.Count);
                 double maxM = Vector.Distance(r.X, r.Y, r.Width, r.Height);
 
-                for(int i = 0; i < rays.Count; i++) {
+                for(int i = 0; i < camera.Rays.Count; i++) {
                     //p = rays[i].Magnitude * Math.Cos((rays[i].Angle - viewer.Angle) * Vector.ToRad);
-                    p = (rays[i].X2 - rays[i].X1) * Math.Cos(viewer.Angle * Vector.ToRad) + // https://youtu.be/eOCQfxRQ2pY?t=606
-                        (rays[i].Y2 - rays[i].Y1) * Math.Sin(viewer.Angle * Vector.ToRad);
+                    p = (camera.Rays[i].X2 - camera.Rays[i].X1) * Math.Cos(camera.Angle * Vector.ToRad) + // https://youtu.be/eOCQfxRQ2pY?t=606
+                        (camera.Rays[i].Y2 - camera.Rays[i].Y1) * Math.Sin(camera.Angle * Vector.ToRad);
                     //p = rays[i].Magnitude;
 
-                    x = ((double)i * r.Width) / rays.Count;
-                    y = Math.Min(100.0 * viewer.ViewDistance / p, r.Height);
+                    x = ((double)i * r.Width) / camera.Rays.Count;
+                    y = Math.Min(100.0 * camera.ViewDistance / p, r.Height);
 
-                    //alpha = (int)Scale(p, 0, maxM, 255, 0);
-                    //alpha = Math.Min(Math.Max(0, alpha), 255);
-                    alpha = Math.Min((int)((255.0 * (y * 1.75)) / r.Height), 255); // 'y' factor is brightness.
+                    //double ad = 255.0 * (y * 0.8) / r.Height; // 'y' factor is ambient light.
+                    double ad = 40000.0 / p;
+                    foreach(Particle l in lights) {
+                        foreach(Vector lr in l.Rays) {
+                            if(Vector.Distance(lr.Destination, camera.Rays[i].Destination) < 3.0 * rw) {
+                                ad += 58.0 * camera.ViewDistance / lr.Magnitude;
+                                break;
+                            }
+                        }
+                    }
+                    alpha = Math.Max(Math.Min((int)ad, 255), 0);
 
-                    using(SolidBrush b = new SolidBrush(Color.FromArgb(alpha, rays[i].Color))) {
-                        g.FillRectangle(b, x, (r.Height - y) / 2.0, rw, y);
+                    using(SolidBrush b = new SolidBrush(Color.FromArgb(alpha, camera.Rays[i].Color))) {
+                        g.FillRectangle(b, x, (r.Height - y) / 2.0, rw * camera.ViewDistance / p, y);
                     }
                 }
             }
-        }
-
-        private double Scale(double v, double vMin, double vMax, double rMin, double rMax) {
-            return ((v - vMin) / (vMax - vMin)) * (rMax - rMin) + rMin;
         }
     }
 }

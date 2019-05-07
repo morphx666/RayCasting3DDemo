@@ -14,11 +14,17 @@ using System.Windows.Forms;
 namespace RayCastingDemo {
     public partial class FormMain : Form {
         private readonly List<Vector> walls = new List<Vector>();
-        private readonly List<Vector> rays = new List<Vector>();
-        bool isDragging;
-        Point mouseDownOrigin;
-        Viewer viewer;
-        FormRenderer renderer;
+        private readonly List<Particle> lights = new List<Particle>();
+
+        private bool isDragging;
+        private Point mouseDownOrigin;
+        private const double moveMentSpeed = 3.0;
+
+        private readonly Particle camera;
+        private readonly FormRenderer renderer;
+        private bool lightsOn = true;
+
+        private readonly Color lightRayColor = Color.FromArgb(128, Color.White);
 
         public enum Movements {
             None = 0b00000000,
@@ -38,19 +44,24 @@ namespace RayCastingDemo {
                           ControlStyles.OptimizedDoubleBuffer |
                           ControlStyles.UserPaint, true);
 
-            viewer = new Viewer(this.DisplayRectangle, 200, 520) {
-                FOV = 70,
-                Magnitude = 200,
+            camera = new Particle(this.DisplayRectangle, 200, 520) {
+                FOV = 75,
+                Magnitude = 200.0,
                 Angle = 295.0
             };
+
+            lights.Add(new Particle(this.DisplayRectangle, 20, 500) {
+                FOV = 90,
+                Magnitude = 1200.0,
+                Angle = 340.0
+            });
 
             walls.CreateRectangle(Color.Gray, 0, 0, this.DisplayRectangle.Width, this.DisplayRectangle.Height);
             walls.CreateRectangle(Color.Blue, 600, 130, 30, 200);
             walls.CreateRectangle(Color.Red, 80, 80, 200, 150);
             walls.CreateRectangle(Color.Green, 300, 200, 100, 80);
 
-            renderer = new FormRenderer(viewer, walls, rays);
-            renderer.Size = this.Size;
+            renderer = new FormRenderer(camera, walls, lights) { Size = this.Size };
             renderer.Show();
             if(Screen.AllScreens.Count() > 1) {
                 Rectangle r = Screen.AllScreens[1].Bounds;
@@ -65,24 +76,24 @@ namespace RayCastingDemo {
                 }
             });
 
-            UpdateRays();
+            UpdateObjects();
 
             this.Paint += RenderScene;
             this.MouseDown += (object s, MouseEventArgs e) => {
                 if(e.Button == MouseButtons.Left) {
                     isDragging = true;
-                    viewer.X1 = e.Location.X;
-                    viewer.Y1 = e.Location.Y;
-                    UpdateRays();
+                    camera.X1 = e.Location.X;
+                    camera.Y1 = e.Location.Y;
+                    UpdateObjects();
                     mouseDownOrigin = e.Location;
                 }
             };
-            this.MouseUp += (object s, MouseEventArgs e) => isDragging = (e.Button == MouseButtons.Left);
+            this.MouseUp += (object s, MouseEventArgs e) => isDragging = !(e.Button == MouseButtons.Left);
             this.MouseMove += (object s, MouseEventArgs e) => {
                 if(isDragging) {
-                    viewer.X1 += e.Location.X - mouseDownOrigin.X;
-                    viewer.Y1 += e.Location.Y - mouseDownOrigin.Y;
-                    UpdateRays();
+                    camera.X1 += e.Location.X - mouseDownOrigin.X;
+                    camera.Y1 += e.Location.Y - mouseDownOrigin.Y;
+                    UpdateObjects();
                     mouseDownOrigin = e.Location;
                 }
             };
@@ -111,6 +122,10 @@ namespace RayCastingDemo {
                         movement |= Movements.Right;
                     }
                     break;
+                case Keys.L:
+                    lightsOn = !lightsOn;
+                    UpdateObjects();
+                    break;
             }
         }
 
@@ -136,59 +151,30 @@ namespace RayCastingDemo {
         }
 
         private void ProcessKeys() {
-            const double s = 4.0;
-            if((movement & Movements.Forward) == Movements.Forward) viewer.Move(s);
-            if((movement & Movements.Back) == Movements.Back) viewer.Move(-s);
-            if((movement & Movements.Left) == Movements.Left) viewer.Angle -= s;
-            if((movement & Movements.Right) == Movements.Right) viewer.Angle += s;
+            if((movement & Movements.Forward) == Movements.Forward) camera.Move(moveMentSpeed);
+            if((movement & Movements.Back) == Movements.Back) camera.Move(-moveMentSpeed);
+            if((movement & Movements.Left) == Movements.Left) camera.Angle -= moveMentSpeed;
+            if((movement & Movements.Right) == Movements.Right) camera.Angle += moveMentSpeed;
             if((movement & Movements.LookLeft) == Movements.LookLeft) {
-                viewer.Angle -= 90;
-                viewer.Move(s);
-                viewer.Angle += 90;
+                camera.Angle -= 90;
+                camera.Move(moveMentSpeed);
+                camera.Angle += 90;
             }
             if((movement & Movements.LookRight) == Movements.LookRight) {
-                viewer.Angle += 90;
-                viewer.Move(s);
-                viewer.Angle -= 90;
+                camera.Angle += 90;
+                camera.Move(moveMentSpeed);
+                camera.Angle -= 90;
             }
-            UpdateRays();
+            UpdateObjects();
         }
 
-        private void UpdateRays() {
-            Vector ray;
-            Vector minV;
-            double minD;
-            double d;
-
-            lock(viewer) {
-                rays.Clear();
-
-                double a1 = viewer.Angle - viewer.FOV / 2;
-                double a2 = viewer.Angle + viewer.FOV / 2;
-                double s = 0.25 * Math.Sign(a2 - a1);
-
-                for(double a = a1; a < a2; a += s) {
-                    ray = new Vector(1.0, a, viewer.Origin);
-
-                    minV = new Vector();
-                    minD = double.PositiveInfinity;
-
-                    foreach(Vector w in walls) {
-                        PointF? pi = w.Intersects(ray);
-                        if(pi.HasValue) {
-                            d = Vector.Distance(ray.Origin, pi.Value);
-                            if(d < minD) {
-                                minD = d;
-                                minV = ray;
-                                minV.Color = w.Color;
-                            }
-                        }
-                    }
-
-                    if(minD != double.PositiveInfinity) {
-                        minV.Magnitude = minD;
-                        rays.Add(minV);
-                    }
+        private void UpdateObjects() {
+            lock(camera) {
+                camera.UpdateRays(walls);
+                if(lightsOn) {
+                    lights.ForEach((l) => l.UpdateRays(walls));
+                } else {
+                    lights.ForEach((l) => l.Rays.Clear());
                 }
             }
             if(this.WindowState == FormWindowState.Minimized) {
@@ -201,22 +187,29 @@ namespace RayCastingDemo {
         private void RenderScene(object sender, PaintEventArgs e) {
             Graphics g = e.Graphics;
 
-            lock(viewer) {
-                g.Clear(Color.Black);
+            g.Clear(Color.Black);
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
 
-                foreach(Vector r in rays) r.Paint(g, Gradient(r.Color, Color.Black, r.Origin, r.Destination));
+            lock(camera) {
+                foreach(Vector l in lights[0].Rays) l.Paint(g, Gradient(lightRayColor, Color.Black, l));
+                foreach(Vector r in camera.Rays) r.Paint(g, Gradient(r.Color, Color.Black, r));
                 foreach(Vector w in walls) w.Paint(g, w.Color);
 
-                g.FillEllipse(Brushes.White, viewer.X1 - 8, viewer.Y1 - 8, 16, 16);
+                g.FillEllipse(Brushes.White, camera.X1 - 8, camera.Y1 - 8, 16, 16);
 
-                viewer.Paint(g, Color.Magenta);
+                camera.Paint(g, Color.Magenta);
+                if(lightsOn) lights.ForEach((l) => l.Paint(g, Color.White));
 
                 renderer.Invalidate();
             }
         }
 
-        private Pen Gradient(Color c1, Color c2, PointF p1, PointF p2) {
-            Brush b = new LinearGradientBrush(p1, p2, c1, c2);
+        private Pen Gradient(Color c1, Color c2, Vector v) {
+            Vector v1 = new Vector(v);
+            v1.Magnitude = Vector.Distance(0, 0, this.DisplayRectangle.Width, this.DisplayRectangle.Height);
+            Brush b = new LinearGradientBrush(v.Origin, v1.Destination, c1, c2);
             return new Pen(b);
         }
     }
