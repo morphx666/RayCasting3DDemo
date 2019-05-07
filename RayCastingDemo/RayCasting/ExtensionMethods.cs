@@ -32,11 +32,11 @@ namespace RayCastingDemo {
         }
 
         public static void CreateRectangle(this List<Vector> v, Color c, double x, double y, double width, double height) {
-            v.Add(Vector.VectorFromPoints(x, y, x + width, y, c)); // Top
-            v.Add(Vector.VectorFromPoints(x, y, x, y + height, c)); // Left
+            v.Add(Vector.VectorFromPoints(x, y, x + width, y, c)); // 0:Top
+            v.Add(Vector.VectorFromPoints(x, y, x, y + height, c)); // 1:Left
 
-            v.Add(Vector.VectorFromPoints(x + width, y, x + width, y + height, c)); // Right
-            v.Add(Vector.VectorFromPoints(x, y + height, x + width, y + height, c)); // Bottom
+            v.Add(Vector.VectorFromPoints(x + width, y, x + width, y + height, c)); // 2:Right
+            v.Add(Vector.VectorFromPoints(x, y + height, x + width, y + height, c)); // 3:Bottom
         }
     }
 }
