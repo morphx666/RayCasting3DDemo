@@ -264,8 +264,8 @@ namespace RayCastingDemo {
             return Distance(p1.X, p1.Y, p2.X, p2.Y);
         }
 
-        public virtual void Paint(Graphics g, Color c, int w = 2) {
-            using(Pen p = new Pen(c, w)) {
+        public virtual void Paint(Graphics g, Color c, double w = 2) {
+            using(Pen p = new Pen(c, (float)w)) {
                 Paint(g, p);
             }
         }

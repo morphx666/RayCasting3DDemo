@@ -76,9 +76,9 @@ namespace RayCastingDemo {
             }
         }
 
-        public override void Paint(Graphics g, Color c, int w = 2) {
+        public override void Paint(Graphics g, Color c, double w = 2) {
             double a = Angle;
-            using(Pen p = new Pen(c, w)) {
+            using(Pen p = new Pen(c, (float)w)) {
                 g.DrawLine(p, X1, Y1, X2, Y2);
 
                 Angle = a - FOV / 2;

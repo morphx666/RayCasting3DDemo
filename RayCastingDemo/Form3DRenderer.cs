@@ -67,9 +67,9 @@ namespace RayCastingDemo {
                     //p = camera.Rays[i].Magnitude; // Fish eye effect
 
                     x = ((double)i * r.Width) / camera.Rays.Count;
-                    y = Math.Min((r.Height / 32.0) * camera.ViewDistance / p, r.Height);
+                    y = Math.Min((r.Height / 28.0) * camera.ViewDistance / p, r.Height);
 
-                    double ad = 4000.0 / p;
+                    double ad = 6000.0 / p;
                     foreach(Particle l in lights) {
                         foreach(Vector lr in l.Rays) {
                             if(Vector.Distance(lr.Destination, camera.Rays[i].Destination) < 3.0 * rw) {
@@ -110,7 +110,7 @@ namespace RayCastingDemo {
                         (camera.Rays[i].Y2 - camera.Rays[i].Y1) * camera.AngleRadSin;
 
                     x = ((double)i * r.Width) / camera.Rays.Count;
-                    y = Math.Min((r.Height / 32.0) * camera.ViewDistance / p, r.Height);
+                    y = Math.Min((r.Height / 28.0) * camera.ViewDistance / p, r.Height);
 
                     w = (Vector)camera.Rays[i].Tag;
                     bmpOffset = (double)w.Tag;
