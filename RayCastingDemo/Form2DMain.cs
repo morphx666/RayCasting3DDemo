@@ -22,7 +22,7 @@ namespace RayCastingDemo {
 
         private readonly Color lightRayColor = Color.FromArgb(128, Color.White);
 
-        private Color[] palette = new Color[10];
+        private readonly Color[] palette = new Color[10];
 
         private readonly int[][] map = { // 50x50 grid
             new int[] {2,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2},
@@ -101,11 +101,11 @@ namespace RayCastingDemo {
                 Angle = 270.0
             };
 
-            //lights.Add(new Particle(this.DisplayRectangle, 20, 500) {
-            //    FOV = 90,
-            //    Magnitude = 1200.0,
-            //    Angle = 340.0
-            //});
+            lights.Add(new Particle(this.DisplayRectangle, this.DisplayRectangle.Width - 30, 700) {
+                FOV = 90,
+                Magnitude = 1200.0,
+                Angle = 260.0
+            });
 
             BuildMap();
 
@@ -120,10 +120,25 @@ namespace RayCastingDemo {
                                               r.Y + (r.Height - renderer.Height) / 2);
             }
 
-            Task.Run(() => {
+            Task.Run(() => { // Keyboard monitor thread
                 while(true) {
-                    Thread.Sleep(60);
+                    Thread.Sleep(45);
                     if(movement != Movements.None) ProcessKeys();
+                }
+            });
+
+            Task.Run(() => { // Renderer thread
+                bool lastLightsOn = lightsOn;
+                while(true) {
+                    Thread.Sleep(33);
+                    if((movement != Movements.None) || isDragging || (lastLightsOn != lightsOn)) {
+                        if(this.WindowState == FormWindowState.Minimized) {
+                            renderer.Invalidate();
+                        } else {
+                            this.Invalidate();
+                        }
+                        lastLightsOn = lightsOn;
+                    }
                 }
             });
 
@@ -175,6 +190,7 @@ namespace RayCastingDemo {
                     break;
                 case Keys.L:
                     lightsOn = !lightsOn;
+                    if(!lightsOn) lights.ForEach((l) => l.Rays.Clear());
                     UpdateObjects();
                     break;
             }
@@ -238,16 +254,7 @@ namespace RayCastingDemo {
         private void UpdateObjects() {
             lock(camera) {
                 camera.UpdateRays(walls);
-                if(lightsOn) {
-                    lights.ForEach((l) => l.UpdateRays(walls));
-                } else {
-                    lights.ForEach((l) => l.Rays.Clear());
-                }
-            }
-            if(this.WindowState == FormWindowState.Minimized) {
-                renderer.Invalidate();
-            } else {
-                this.Invalidate();
+                if(lightsOn) lights.ForEach((l) => l.UpdateRays(walls));
             }
         }
 
@@ -255,15 +262,13 @@ namespace RayCastingDemo {
             Graphics g = e.Graphics;
 
             g.Clear(Color.Black);
-            //g.SmoothingMode = SmoothingMode.AntiAlias;
-            //g.PixelOffsetMode = PixelOffsetMode.HighQuality;
             g.InterpolationMode = InterpolationMode.NearestNeighbor;
 
             lock(camera) {
-                foreach(Particle l in lights) foreach(Vector r in l.Rays) r.Paint(g, Gradient(lightRayColor, Color.Black, r));
-                foreach(Vector r in camera.Rays) r.Paint(g, Gradient(r.Color, Color.Black, r));
-                //foreach(Vector w in walls) w.Paint(g, w.Color, 1);
-                for(int i = 0; i < walls.Count; i += 4) {
+                lights.ForEach((l) => l.Rays.ForEach((r) => r.Paint(g, Gradient(lightRayColor, Color.Black, r))));
+                camera.Rays.ForEach((r) => r.Paint(g, Gradient(r.Color, Color.Black, r)));
+                //walls.ForEach((w) => w.Paint(g, w.Color, 1)); // Outline
+                for(int i = 0; i < walls.Count; i += 4) { // Filled
                     using(Brush b = new SolidBrush(walls[i].Color)) {
                         g.FillRectangle(b, walls[i + 0].X1, walls[i + 0].Y1,
                                            walls[i + 2].X1 - walls[i + 0].X1, walls[i + 3].Y1 - walls[i + 0].Y1);
@@ -280,13 +285,13 @@ namespace RayCastingDemo {
         }
 
         private Pen Gradient(Color c1, Color c2, Vector v) {
-            Vector v1 = new Vector(v);
-            v1.Magnitude = Vector.Distance(0, 0, this.DisplayRectangle.Width, this.DisplayRectangle.Height);
-            Brush b = new LinearGradientBrush(v.Origin, v1.Destination, c1, c2);
-            return new Pen(b);
+            Vector v1 = new Vector(v) {
+                Magnitude = Vector.Distance(0, 0, this.DisplayRectangle.Width, this.DisplayRectangle.Height)
+            };
+            return new Pen(new LinearGradientBrush(v.Origin, v1.Destination, c1, c2));
         }
 
-        private void BuildMap() { // FIXME: This code is broken!
+        private void BuildMap() { // FIXME: This code is broken! 😒
             palette[0] = Color.Black;
             palette[1] = Color.Gray;
             palette[2] = Color.White;
@@ -342,6 +347,10 @@ namespace RayCastingDemo {
             int xs = 1 + this.Size.Width - this.DisplayRectangle.Width;
             int ys = 1 + this.Size.Height - this.DisplayRectangle.Height;
             this.Size = new Size(cellSize.Width * map.Length + xs, cellSize.Height * map[0].Length + ys);
+
+            //walls.Clear();
+            //walls.CreateRectangle(40, 300, 400, 100);
+            //walls.CreateRectangle(0, 0, 10, this.DisplayRectangle.Height);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using RayCasting;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -29,7 +30,6 @@ namespace RayCastingDemo {
             this.camera = viewer;
             this.walls = walls;
             this.lights = lights;
-
 
             this.Paint += (object sender, PaintEventArgs e) => {
                 switch(RenderMode) {
@@ -65,7 +65,7 @@ namespace RayCastingDemo {
                     double ad = 6000.0 / p;
                     foreach(Particle l in lights) {
                         foreach(Vector lr in l.Rays) {
-                            if(Vector.Distance(lr.Destination, camera.Rays[i].Destination) < 3.0 * rw) {
+                            if(Vector.Distance(lr.Destination, camera.Rays[i].Destination) < 6.0 * rw) {
                                 ad += 58.0 * camera.ViewDistance / lr.Magnitude;
                                 break;
                             }
@@ -95,7 +95,10 @@ namespace RayCastingDemo {
                 double y;
                 double p;
                 double rw = (double)r.Width / camera.Rays.Count;
-                Vector w;
+
+                int wallIndex = 0;
+                int wallSideIndex;
+                int sideIndex;
                 double bmpOffset = 0;
 
                 for(int i = 0; i < camera.Rays.Count; i++) {
@@ -105,13 +108,30 @@ namespace RayCastingDemo {
                     x = ((double)i * r.Width) / camera.Rays.Count;
                     y = Math.Min((r.Height / 28.0) * camera.ViewDistance / p, r.Height);
 
-                    w = (Vector)camera.Rays[i].Tag;
-                    bmpOffset = (double)w.Tag;
+                    wallSideIndex = (int)camera.Rays[i].Tag;
+                    sideIndex = wallSideIndex % 4;
+                    wallIndex = wallSideIndex - sideIndex;
+                    switch(sideIndex) {
+                        case 0: // Top
+                            bmpOffset = camera.Rays[i].X2;
+                            break;
+                        case 3: // Bottom
+                            bmpOffset = camera.Rays[i].X2;
+                            break;
+                        case 1: // Left
+                            bmpOffset = camera.Rays[i].Y2;
+                            break;
+                        case 2: // Right
+                            bmpOffset = camera.Rays[i].Y2;
+                            break;
+                    }
 
-                    src = new RectangleF((float)bmpOffset, 0, (float)rw, wbSize.Height);
+                    while(bmpOffset <= 0) bmpOffset += wbSize.Width;
+                    bmpOffset %= (wbSize.Width-rw);
+
+                    src = new RectangleF((float)bmpOffset, 0, (float)(rw), wbSize.Height);
                     trg = new RectangleF((float)x, (float)((r.Height - y) / 2.0), (float)rw, (float)y);
                     g.DrawImage(Properties.Resources.WallBmp, trg, src, GraphicsUnit.Pixel);
-                    w.Tag = (bmpOffset + rw) % wbSize.Width;
                 }
             }
         }

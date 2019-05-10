@@ -51,7 +51,8 @@ namespace RayCasting {
                 minV = new Vector();
                 minD = double.PositiveInfinity;
 
-                foreach(Vector w in walls) {
+                for(int i = 0; i < walls.Count; i++) {
+                    Vector w = walls[i];
                     PointF? pi = w.Intersects(ray);
                     if(pi.HasValue) {
                         d = Vector.Distance(ray.Origin, pi.Value);
@@ -59,8 +60,7 @@ namespace RayCasting {
                             minD = d;
                             minV = ray;
                             minV.Color = w.Color;
-                            w.Tag = 0.0; // bmpOffset
-                            minV.Tag = w;
+                            minV.Tag = i; // Wall ID
                         }
                     }
                 }
@@ -68,7 +68,6 @@ namespace RayCasting {
                 if(minD != double.PositiveInfinity) {
                     minV.Magnitude = minD;
                     mRays.Add(minV);
-
                 }
             }
         }

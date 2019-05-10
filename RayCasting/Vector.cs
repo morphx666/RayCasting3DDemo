@@ -12,8 +12,8 @@ namespace RayCasting {
         private double angleCos = 1.0;
         private double angleSin = 0.0;
         private Color mColor = Color.White;
+        private double mAngleRad;
 
-        private double angleRad;
         private readonly int hc = Guid.NewGuid().GetHashCode();
 
         public delegate void ChangedEventHandler(object sender, EventArgs e);
@@ -64,14 +64,14 @@ namespace RayCasting {
                     if(value < 0) value += 360.0;
                     mAngle = value % 360.0;
 
-                    angleRad = mAngle * ToRad;
-                    angleCos = Math.Cos(angleRad);
-                    angleSin = Math.Sin(angleRad);
+                    mAngleRad = mAngle * ToRad;
+                    angleCos = Math.Cos(mAngleRad);
+                    angleSin = Math.Sin(mAngleRad);
                 }
             }
         }
 
-        public double AngleRad { get { return angleRad; } }
+        public double AngleRad { get { return mAngleRad; } }
 
         public double AngleRadCos { get { return angleCos; } }
         public double AngleRadSin { get { return angleSin; } }

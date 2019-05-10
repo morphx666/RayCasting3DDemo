@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.0</TargetFramework>
-    <AssemblyVersion>2019.5.7.16</AssemblyVersion>
-    <FileVersion>2019.5.7.16</FileVersion>
+    <AssemblyVersion>2019.5.8.27</AssemblyVersion>
+    <FileVersion>2019.5.8.27</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
