@@ -16,8 +16,9 @@ namespace RayCastingDemo {
         private Point mouseDownOrigin;
         private const double moveMentSpeed = 3.0;
 
+        private Renderer renderer;
         private readonly Particle camera;
-        private readonly Form3DRenderer renderer;
+        private readonly Form3DRenderer frm3D;
         private bool lightsOn = true;
 
         private readonly Color lightRayColor = Color.FromArgb(128, Color.White);
@@ -107,17 +108,19 @@ namespace RayCastingDemo {
                 Angle = 260.0
             });
 
+            renderer = new Renderer(camera, walls, lights);
+
             BuildMap();
 
-            renderer = new Form3DRenderer(camera, walls, lights) {
+            frm3D = new Form3DRenderer(camera, walls, lights, renderer) {
                 Size = this.Size,
                 RenderMode = Form3DRenderer.RenderModes.Shaded
             };
-            renderer.Show();
+            frm3D.Show();
             if(Screen.AllScreens.Count() > 1) {
                 Rectangle r = Screen.AllScreens[1].Bounds;
-                renderer.Location = new Point(r.X + (r.Width - renderer.Width) / 2,
-                                              r.Y + (r.Height - renderer.Height) / 2);
+                frm3D.Location = new Point(r.X + (r.Width - frm3D.Width) / 2,
+                                           r.Y + (r.Height - frm3D.Height) / 2);
             }
 
             Task.Run(() => { // Keyboard monitor thread
@@ -133,7 +136,7 @@ namespace RayCastingDemo {
                     Thread.Sleep(33);
                     if((movement != Movements.None) || isDragging || (lastLightsOn != lightsOn)) {
                         if(this.WindowState == FormWindowState.Minimized) {
-                            renderer.Invalidate();
+                            frm3D.Invalidate();
                         } else {
                             this.Invalidate();
                         }
@@ -144,7 +147,11 @@ namespace RayCastingDemo {
 
             UpdateObjects();
 
-            this.Paint += RenderScene;
+            this.Paint += (object s, PaintEventArgs e) => {
+                renderer.Render2DMap(e.Graphics, this.DisplayRectangle, lightsOn, lightRayColor);
+                frm3D.Invalidate();
+            };
+
             this.MouseDown += (object s, MouseEventArgs e) => {
                 if(e.Button == MouseButtons.Left) {
                     isDragging = true;
@@ -165,9 +172,9 @@ namespace RayCastingDemo {
             };
 
             this.KeyDown += (object s, KeyEventArgs e) => HandleKeyDown(e);
-            renderer.KeyDown += (object s, KeyEventArgs e) => HandleKeyDown(e);
+            frm3D.KeyDown += (object s, KeyEventArgs e) => HandleKeyDown(e);
             this.KeyUp += (object s, KeyEventArgs e) => HandleKeyUp(e);
-            renderer.KeyUp += (object s, KeyEventArgs e) => HandleKeyUp(e);
+            frm3D.KeyUp += (object s, KeyEventArgs e) => HandleKeyUp(e);
         }
 
         private void HandleKeyDown(KeyEventArgs e) {
@@ -256,39 +263,6 @@ namespace RayCastingDemo {
                 camera.UpdateRays(walls);
                 if(lightsOn) lights.ForEach((l) => l.UpdateRays(walls));
             }
-        }
-
-        private void RenderScene(object sender, PaintEventArgs e) {
-            Graphics g = e.Graphics;
-
-            g.Clear(Color.Black);
-            g.InterpolationMode = InterpolationMode.NearestNeighbor;
-
-            lock(camera) {
-                lights.ForEach((l) => l.Rays.ForEach((r) => r.Paint(g, Gradient(lightRayColor, Color.Black, r))));
-                camera.Rays.ForEach((r) => r.Paint(g, Gradient(r.Color, Color.Black, r)));
-                //walls.ForEach((w) => w.Paint(g, w.Color, 1)); // Outline
-                for(int i = 0; i < walls.Count; i += 4) { // Filled
-                    using(Brush b = new SolidBrush(walls[i].Color)) {
-                        g.FillRectangle(b, walls[i + 0].X1, walls[i + 0].Y1,
-                                           walls[i + 2].X1 - walls[i + 0].X1, walls[i + 3].Y1 - walls[i + 0].Y1);
-                    }
-                }
-
-                g.FillEllipse(Brushes.White, camera.X1 - 8, camera.Y1 - 8, 16, 16);
-
-                camera.Paint(g, Color.Magenta);
-                if(lightsOn) lights.ForEach((l) => l.Paint(g, Color.White));
-
-                renderer.Invalidate();
-            }
-        }
-
-        private Pen Gradient(Color c1, Color c2, Vector v) {
-            Vector v1 = new Vector(v) {
-                Magnitude = Vector.Distance(0, 0, this.DisplayRectangle.Width, this.DisplayRectangle.Height)
-            };
-            return new Pen(new LinearGradientBrush(v.Origin, v1.Destination, c1, c2));
         }
 
         private void BuildMap() { // FIXME: This code is broken! 😒
