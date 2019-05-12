@@ -199,6 +199,22 @@ namespace RayCastingDemo {
                     lightsOn = !lightsOn;
                     if(!lightsOn) lights.ForEach((l) => l.Rays.Clear());
                     UpdateObjects();
+                    frm3D.UpdateTitleBarText();
+                    break;
+                case Keys.T:
+                    switch(frm3D.RenderMode) {
+                        case Form3DRenderer.RenderModes.Shaded:
+                            frm3D.RenderMode = Form3DRenderer.RenderModes.Textured;
+                            break;
+                        case Form3DRenderer.RenderModes.Textured:
+                            frm3D.RenderMode = Form3DRenderer.RenderModes.TexturedAndColorized;
+                            break;
+                        case Form3DRenderer.RenderModes.TexturedAndColorized:
+                            frm3D.RenderMode = Form3DRenderer.RenderModes.Shaded;
+                            break;
+                    }
+                    frm3D.UpdateTitleBarText();
+                    this.Invalidate();
                     break;
             }
         }
@@ -260,7 +276,7 @@ namespace RayCastingDemo {
 
         private void UpdateObjects() {
             lock(camera) {
-                camera.UpdateRays(walls);
+                camera.UpdateRays(walls, 0.25);
                 if(lightsOn) lights.ForEach((l) => l.UpdateRays(walls));
             }
         }

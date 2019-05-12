@@ -33,7 +33,7 @@ namespace RayCasting {
             mViewDistance = (area.Width / 2.0) / Math.Tan((mFOV * Vector.ToRad) / 2.0);
         }
 
-        public void UpdateRays(List<Vector> walls) {
+        public void UpdateRays(List<Vector> walls, double precission = 0.25) {
             Vector ray;
             Vector minV;
             double minD;
@@ -43,7 +43,7 @@ namespace RayCasting {
 
             double a1 = Angle - FOV / 2;
             double a2 = Angle + FOV / 2;
-            double s = 0.25 * Math.Sign(a2 - a1);
+            double s = precission * Math.Sign(a2 - a1);
 
             for(double a = a1; a < a2; a += s) {
                 ray = new Vector(1.0, a, Origin);

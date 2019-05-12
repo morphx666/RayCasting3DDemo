@@ -1,22 +1,25 @@
-﻿using RayCasting;
+﻿using OpenSimplexNoiseSample;
+using RayCasting;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 
 namespace RayCastingDemo {
     public partial class Form3DRenderer : Form {
         public enum RenderModes {
-            Shaded,
-            Textured
+            Shaded = 0,
+            Textured = 1,
+            TexturedAndColorized = 2
         }
 
         private readonly Particle camera;
         private readonly List<Vector> walls;
         private readonly List<Particle> lights;
         private readonly Renderer renderer;
-        private Size wbSize = new Size(Properties.Resources.WallBmp.Width, Properties.Resources.WallBmp.Height);
+        private Bitmap texture;
 
         public RenderModes RenderMode { get; set; } = RenderModes.Shaded;
 
@@ -33,12 +36,21 @@ namespace RayCastingDemo {
             this.lights = lights;
             this.renderer = renderer;
 
+            texture = (Bitmap)Image.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Textures\WallBmp.png"));
+
             this.Paint += (object sender, PaintEventArgs e) => {
                 switch(RenderMode) {
                     case RenderModes.Shaded: renderer.Render3DMapShaded(e.Graphics, this.DisplayRectangle); break;
-                    case RenderModes.Textured: renderer.Render3DMapTextured(e.Graphics, this.DisplayRectangle, Properties.Resources.WallBmp); break;
+                    case RenderModes.Textured: renderer.Render3DMapTextured(e.Graphics, this.DisplayRectangle, texture); break;
+                    case RenderModes.TexturedAndColorized: renderer.Render3DMapTextured(e.Graphics, this.DisplayRectangle, texture, 0.93); break;
                 }
             };
+
+            UpdateTitleBarText();
+        }
+
+        public void UpdateTitleBarText() {
+            this.Text = $"RayCasting Demo (3D Scene): {RenderMode}";
         }
     }
 }
