@@ -207,9 +207,9 @@ namespace RayCastingDemo {
                             frm3D.RenderMode = Form3DRenderer.RenderModes.Textured;
                             break;
                         case Form3DRenderer.RenderModes.Textured:
-                            frm3D.RenderMode = Form3DRenderer.RenderModes.TexturedAndColorized;
+                            frm3D.RenderMode = Form3DRenderer.RenderModes.TexturedShaded;
                             break;
-                        case Form3DRenderer.RenderModes.TexturedAndColorized:
+                        case Form3DRenderer.RenderModes.TexturedShaded:
                             frm3D.RenderMode = Form3DRenderer.RenderModes.Shaded;
                             break;
                     }

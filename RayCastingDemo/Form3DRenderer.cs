@@ -12,7 +12,7 @@ namespace RayCastingDemo {
         public enum RenderModes {
             Shaded = 0,
             Textured = 1,
-            TexturedAndColorized = 2
+            TexturedShaded = 2
         }
 
         private readonly Particle camera;
@@ -42,7 +42,7 @@ namespace RayCastingDemo {
                 switch(RenderMode) {
                     case RenderModes.Shaded: renderer.Render3DMapShaded(e.Graphics, this.DisplayRectangle); break;
                     case RenderModes.Textured: renderer.Render3DMapTextured(e.Graphics, this.DisplayRectangle, texture); break;
-                    case RenderModes.TexturedAndColorized: renderer.Render3DMapTextured(e.Graphics, this.DisplayRectangle, texture, 0.93); break;
+                    case RenderModes.TexturedShaded: renderer.Render3DMapTextured(e.Graphics, this.DisplayRectangle, texture, 0.93); break;
                 }
             };
 

@@ -34,7 +34,7 @@
             this.MaximizeBox = false;
             this.Name = "FormMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "RayCasting Demo (2D Scene)";
+            this.Text = "RayCasting Demo (2D Scene) | Arrows: Move | L: Toggle Lights | T: Change Render Mode";
             this.ResumeLayout(false);
 
         }

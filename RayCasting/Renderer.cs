@@ -134,7 +134,7 @@ namespace RayCasting {
             }
         }
 
-        public void Render3DMapTextured(Graphics g, Rectangle r, Bitmap texture, double colorize) {
+        public void Render3DMapTextured(Graphics g, Rectangle r, Bitmap texture, double shading) {
             g.Clear(Color.Black);
 
             lock(camera) {
@@ -197,7 +197,7 @@ namespace RayCasting {
                     a = Math.Max(Math.Min((int)CalculateAlpha(p, rw, i), 255), 0);
 
                     sg.DrawImage(ctext.Bitmap, trg, src, GraphicsUnit.Pixel);
-                    ColorizeBitmap(scene, Color.FromArgb(a, camera.Rays[i].Color), trg, colorize);
+                    ColorizeBitmap(scene, Color.FromArgb(a, camera.Rays[i].Color), trg, shading);
 
                     lastBmpOffset = bmpOffset;
                 }
@@ -223,22 +223,22 @@ namespace RayCasting {
             return ad;
         }
 
-        private void ColorizeBitmap(DirectBitmap scene, Color color, RectangleF r, double p) {
-            Color c;
-            double p1 = 1.0 - p;
+        private void ColorizeBitmap(DirectBitmap scene, Color sc, RectangleF r, double s) {
+            Color pc;
+            double p1 = 1.0 - s;
             for(int y = (int)r.Y; y < r.Bottom; y++) {
                 for(int x = (int)r.X; x < r.Right; x++) {
-                    c = scene.GetPixel(x, y);
+                    pc = scene.GetPixel(x, y);
                     scene.SetPixel(x, y, Color.FromArgb(
-                        (int)(p * (c.R * color.A / 255) + color.R * p1),
-                        (int)(p * (c.G * color.A / 255) + color.G * p1),
-                        (int)(p * (c.B * color.A / 255) + color.B * p1)));
+                        (int)(s * (pc.R * sc.A / 255) + sc.R * p1),
+                        (int)(s * (pc.G * sc.A / 255) + sc.G * p1),
+                        (int)(s * (pc.B * sc.A / 255) + sc.B * p1)));
 
                     //scene.SetPixel(x, y, Color.FromArgb(
-                    //    (255 - (255 - c.A) * (255 - color.A) / 255),
-                    //    (c.R * (255 - color.A) + color.R * color.A) / 255,
-                    //    (c.G * (255 - color.A) + color.G * color.A) / 255,
-                    //    (c.B * (255 - color.A) + color.B * color.A) / 255));
+                    //    (255 - (255 - pc.A) * (255 - color.A) / 255),
+                    //    (pc.R * (255 - color.A) + color.R * color.A) / 255,
+                    //    (pc.G * (255 - color.A) + color.G * color.A) / 255,
+                    //    (pc.B * (255 - color.A) + color.B * color.A) / 255));
 
                     //scene.SetPixel(x, y,
                     //    Color.FromArgb(
