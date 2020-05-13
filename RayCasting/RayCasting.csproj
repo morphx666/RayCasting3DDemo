@@ -1,21 +1,26 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
-    <AssemblyVersion>2019.5.13.160</AssemblyVersion>
-    <FileVersion>2019.5.13.160</FileVersion>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AssemblyVersion>2020.4.120.167</AssemblyVersion>
+    <FileVersion>2020.4.120.167</FileVersion>
+    <OutputType>Library</OutputType>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <OutputPath>D:\Users\Xavier Flix\Dropbox\Projects\RayCastingDemo\Release\</OutputPath>
+    <OutputPath>..\Release\</OutputPath>
+    <DefineConstants>TRACE;WINFORMS, ISLIB</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>D:\Users\Xavier Flix\Dropbox\Projects\RayCastingDemo\Release\</OutputPath>
+    <OutputPath>..\Release\</OutputPath>
+    <DefineConstants>TRACE;WINFORMS, ISLIB</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Drawing.Common" Version="4.5.1" />
+    <PackageReference Include="System.Drawing.Common" Version="4.7.0" />
   </ItemGroup>
+
+  <Import Project="MorphxLibs\MorphxLibs.projitems" Label="Shared" />
 
 </Project>

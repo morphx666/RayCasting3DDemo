@@ -1,18 +1,54 @@
 ﻿using System;
+#if WINFORMS
 using System.Drawing;
+#else
+using Eto.Drawing;
+#endif
 
-namespace RayCasting {
+namespace MorphxLibs {
+    public struct PointD {
+        public static readonly PointD Empty = new PointD(0, 0);
+        public double X;
+        public double Y;
+
+        public PointD(double x, double y) {
+            X = x;
+            Y = y;
+        }
+
+        public override int GetHashCode() {
+            return base.GetHashCode();
+        }
+
+        public override bool Equals(object obj) {
+            return this == (PointD)obj;
+        }
+
+        public static bool operator ==(PointD p1, PointD p2) {
+            return (p1.X == p2.X) && (p1.Y == p2.Y);
+        }
+
+        public static bool operator !=(PointD p1, PointD p2) {
+            return !(p1 == p2);
+        }
+
+        public static implicit operator PointD(Point p) => new PointD(p.X, p.Y);
+        public static implicit operator PointD(PointF p) => new PointD(p.X, p.Y);
+        public static implicit operator Point(PointD p) => new Point((int)p.X, (int)p.Y);
+        public static implicit operator PointF(PointD p) => new PointF((float)p.X, (float)p.Y);
+    }
+
     public class Vector {
-        public const double ToRad = Math.PI / 180.0;
-        public const double ToDeg = 180.0 / Math.PI;
-
         private double mMagnitude;
         private double mAngle;
-        private PointF mOrigin;
+        private PointD mOrigin;
         private double angleCos = 1.0;
         private double angleSin = 0.0;
+#if WINFORMS
         private Color mColor = Color.White;
-        private double mAngleRad;
+#else
+        private Color mColor = Colors.White;
+#endif
 
         private readonly int hc = Guid.NewGuid().GetHashCode();
 
@@ -24,21 +60,24 @@ namespace RayCasting {
         public Vector() {
             mAngle = 0.0;
             mMagnitude = 1.0;
-            mOrigin = new PointF(0, 0);
+            mOrigin = new PointD(0, 0);
         }
 
-        public Vector(double magnitude, double angle, PointF origin) {
-            mMagnitude = Math.Abs(magnitude);
+        public Vector(double x, double y) {
+            Reset(0, 0, x, y);
+        }
+
+        public Vector(double magnitude, double angle, PointD origin) {
+            mMagnitude = magnitude;
             Angle = angle;
-            if(magnitude < 0) Angle += 180.0;
             mOrigin = origin;
         }
 
-        public Vector(PointF origin, PointF destination) {
-            ResetVectorFromPoints(origin.X, origin.Y, destination.X, destination.Y);
+        public Vector(PointD origin, PointD destination) {
+            Reset(origin.X, origin.Y, destination.X, destination.Y);
         }
 
-        public Vector(PointF origin, PointF destination, Color color) : this(origin, destination) {
+        public Vector(PointD origin, PointD destination, Color color) : this(origin, destination) {
             mColor = color;
         }
 
@@ -46,37 +85,31 @@ namespace RayCasting {
             mColor = vector.Color;
         }
 
-        public Vector(double magnitude, double angle, double x, double y) : this(magnitude, angle, new PointF((float)x, (float)y)) {
+        public Vector(double magnitude, double angle, double x, double y) : this(magnitude, angle, new PointD(x, y)) {
         }
 
         public double Magnitude {
             get { return mMagnitude; }
-            set {
-                mMagnitude = Math.Abs(value);
-                if(value < 0) Angle += 180.0;
-            }
+            set { mMagnitude = value; }
         }
 
         public double Angle {
             get { return mAngle; }
             set {
                 if(value != mAngle) {
-                    if(value < 0) value += 360.0;
-                    mAngle = value % 360.0;
+                    if(value < 0) value += Constants.PI360;
+                    mAngle = value % Constants.PI360;
 
-                    mAngleRad = mAngle * ToRad;
-                    angleCos = Math.Cos(mAngleRad);
-                    angleSin = Math.Sin(mAngleRad);
+                    angleCos = Math.Cos(mAngle);
+                    angleSin = Math.Sin(mAngle);
                 }
             }
         }
 
-        public double AngleRad { get { return mAngleRad; } }
+        public double AngleCos { get { return angleCos; } }
+        public double AngleSin { get { return angleSin; } }
 
-        public double AngleRadCos { get { return angleCos; } }
-        public double AngleRadSin { get { return angleSin; } }
-
-        public PointF Origin {
+        public PointD Origin {
             get { return mOrigin; }
             set {
                 if(mOrigin != value) {
@@ -86,29 +119,29 @@ namespace RayCasting {
             }
         }
 
-        public PointF Destination {
-            get { return new PointF((float)X2, (float)Y2); }
-            set { ResetVectorFromPoints(mOrigin.X, mOrigin.Y, value.X, value.Y); }
+        public PointD Destination {
+            get { return new PointD(X2, Y2); }
+            set { Reset(mOrigin.X, mOrigin.Y, value.X, value.Y); }
         }
 
         public double X1 {
             get { return mOrigin.X; }
-            set { ResetVectorFromPoints(value, mOrigin.Y, X2, Y2); }
+            set { Reset(value, mOrigin.Y, X2, Y2); }
         }
 
         public double Y1 {
             get { return mOrigin.Y; }
-            set { ResetVectorFromPoints(mOrigin.X, value, X2, Y2); }
+            set { Reset(mOrigin.X, value, X2, Y2); }
         }
 
         public double X2 {
             get { return mOrigin.X + mMagnitude * angleCos; }
-            set { ResetVectorFromPoints(mOrigin.X, mOrigin.Y, value, Y2); }
+            set { Reset(mOrigin.X, mOrigin.Y, value, Y2); }
         }
 
         public double Y2 {
             get { return mOrigin.Y + mMagnitude * angleSin; }
-            set { ResetVectorFromPoints(mOrigin.X, mOrigin.Y, X2, value); }
+            set { Reset(mOrigin.X, mOrigin.Y, X2, value); }
         }
 
         public double Slope {
@@ -125,14 +158,37 @@ namespace RayCasting {
             Origin = ov.Destination;
         }
 
-        public void Translate(double x, double y) {
-            PointF dp = Destination;
-            mOrigin = new PointF((float)(mOrigin.X + x), (float)(mOrigin.Y + y));
-            Destination = new PointF((float)(dp.X + x), (float)(dp.Y + y));
+        public void Move(Vector v) {
+            double a = mAngle;
+            Angle = v.Angle;
+            this.Move(v.Magnitude);
+            Angle = a;
         }
 
-        public void Transform(double angle, PointF p) {
-            angle *= ToRad;
+        public void Translate(double x, double y) {
+            PointD dp = Destination;
+            mOrigin = new PointD(mOrigin.X + x, mOrigin.Y + y);
+            Destination = new PointD(dp.X + x, dp.Y + y);
+        }
+
+        public void TranslateAbs(double x, double y) {
+            double dx = x - mOrigin.X;
+            double dy = y - mOrigin.Y;
+            PointD dp = Destination;
+
+            mOrigin = new PointD(x, y);
+            Destination = new PointD(dp.X + dx, dp.Y + dy);
+        }
+
+        public void TranslateAbs(Vector v) {
+            this.TranslateAbs(v.X1, v.Y1);
+        }
+
+        public void TranslateAbs(PointD p) {
+            this.TranslateAbs(p.X, p.Y);
+        }
+
+        public void Transform(double angle, PointD p) {
             double dx = X1 - p.X;
             double dy = Y1 - p.Y;
             double d = Vector.Distance(dx, dy);
@@ -143,55 +199,73 @@ namespace RayCasting {
             dy = Y2 - p.Y;
             d = Vector.Distance(dx, dy);
             a = Math.Atan2(dy, dx) + angle;
-            ResetVectorFromPoints(xp1, yp1, p.X + d * Math.Cos(a), p.Y + d * Math.Sin(a));
+            Reset(xp1, yp1, p.X + d * Math.Cos(a), p.Y + d * Math.Sin(a));
         }
 
-        public PointF? Intersects(Vector v) {
+        public PointD? Intersects(Vector v) {
             double d = (X1 - X2) * (v.Y1 - v.Y2) - (Y1 - Y2) * (v.X1 - v.X2);
             double t = ((X1 - v.X1) * (v.Y1 - v.Y2) - (Y1 - v.Y2) * (v.X1 - v.X2)) / d;
             double u = -((X1 - X2) * (Y1 - v.Y1) - (Y1 - Y2) * (X1 - v.X1)) / d;
 
             if((t >= 0.0) && (t <= 1.0) && (u >= 0)) {
-                PointF p = new PointF((float)(X1 + t * (X2 - X1)), (float)(Y1 + t * (Y2 - Y1)));
+                PointD p = new PointD(X1 + t * (X2 - X1), Y1 + t * (Y2 - Y1));
                 return p;
             } else {
                 return null;
             }
         }
 
-        private void ResetVectorFromPoints(double px1, double py1, double px2, double py2) {
-            Vector v = Vector.VectorFromPoints(px1, py1, px2, py2);
+        public bool Intersects(RectangleF r) {
+            return (X1 >= r.Left) && (X1 <= r.Right) && (Y1 >= r.Top) && (Y1 <= r.Bottom);
+        }
+
+        public void Reset(double px1, double py1, double px2, double py2) {
+            Vector v = Vector.FromPoints(px1, py1, px2, py2);
             mMagnitude = v.Magnitude;
             mOrigin = v.Origin;
             Angle = v.Angle;
         }
 
-        public static Vector VectorFromPoints(double px1, double py1, double px2, double py2) {
+        public void Reset(Vector v) {
+            mMagnitude = v.Magnitude;
+            mOrigin = v.Origin;
+            Angle = v.Angle;
+        }
+
+        public static Vector FromPoints(double px1, double py1, double px2, double py2) {
             Vector v = new Vector();
             double dx = px2 - px1;
             double dy = py2 - py1;
 
-            v.Angle = Math.Atan2(dy, dx) * ToDeg;
+            v.Angle = Math.Atan2(dy, dx);
             v.Magnitude = Vector.Distance(dx, dy);
-            v.Origin = new PointF((float)px1, (float)py1);
+            v.Origin = new PointD(px1, py1);
 
             return v;
         }
 
-        public static Vector VectorFromPoints(double px1, double py1, double px2, double py2, Color c) {
-            Vector v = Vector.VectorFromPoints(px1, py1, px2, py2);
+        public static Vector FromPoints(double px1, double py1, double px2, double py2, Color c) {
+            Vector v = Vector.FromPoints(px1, py1, px2, py2);
             v.Color = c;
             return v;
         }
 
-        public static Vector Normalize(PointF p1, PointF p2) {
-            Vector v = Vector.VectorFromPoints(p1.X, p1.Y, p2.X, p2.Y);
+        public static Vector Normalize(PointD p1, PointD p2) {
+            Vector v = Vector.FromPoints(p1.X, p1.Y, p2.X, p2.Y);
             v.Magnitude = 1.0;
             return v;
         }
 
+        public static Vector Normalize(Vector v) {
+            return new Vector(v) { Magnitude = 1.0 };
+        }
+
+        public static Vector Empty {
+            get => new Vector(0, 0, 0, 0);
+        }
+
         public static bool operator ==(Vector v1, Vector v2) {
-            return (v1.Angle == v2.Angle) && (v1.Magnitude == v2.Magnitude);
+            return (v1?.Angle == v2?.Angle) && (v1?.Magnitude == v2?.Magnitude);
         }
 
         public static bool operator !=(Vector v1, Vector v2) {
@@ -217,7 +291,7 @@ namespace RayCasting {
         }
 
         public static Vector operator /(Vector v1, double s) {
-            return v1 / s;
+            return v1 * (1 / s);
         }
 
         public static double Pow(Vector v1, double power) {
@@ -227,8 +301,7 @@ namespace RayCasting {
 
         public static double Dot(Vector v1, Vector v2) {
             double a = Math.Abs(v1.Angle - v2.Angle);
-            if(a > 180.0) a = 360.0 - a;
-            return v1.Magnitude * v2.Magnitude * Math.Cos(a * ToRad);
+            return v1.Magnitude * v2.Magnitude * Math.Cos(a);
         }
 
         public static double Cross(Vector v1, Vector v2) {
@@ -240,7 +313,8 @@ namespace RayCasting {
         }
 
         public static Vector Cross(Vector v1, double s) {
-            return new Vector(v1.Origin, new PointF((float)(v1.X1 + -s * (v1.Y2 - v1.Y1)), (float)(v1.Y1 + s * (v1.X2 - v1.X1))));
+            return new Vector(v1.Origin, new PointD(v1.X1 + -s * (v1.Y2 - v1.Y1),
+                                                    v1.Y1 + s * (v1.X2 - v1.X1)));
         }
 
         public static Vector Cross(double s, Vector v1) {
@@ -255,20 +329,23 @@ namespace RayCasting {
             return Math.Sqrt(dx * dx + dy * dy);
         }
 
-        public static double Distance(PointF p1, PointF p2) {
+        public static double Distance(PointD p1, PointD p2) {
             return Distance(p1.X, p1.Y, p2.X, p2.Y);
         }
 
-        public virtual void Paint(Graphics g, Color c, double w = 2) {
-            using(Pen p = new Pen(c, (float)w)) {
-                Paint(g, p);
-            }
+        public virtual void Paint(Graphics g, Color c, float w = 2, double scale = 1.0) {
+            using(Pen p = new Pen(c, w)) Paint(g, p, scale);
         }
 
-        public virtual void Paint(Graphics g, Pen p) {
+        public virtual void Paint(Graphics g, Pen p, double scale = 1.0) {
             if(mMagnitude == 0.0) return;
-
-            g.DrawLine(p, X1, Y1, X2, Y2);
+            if(scale == 1.0) {
+                g.DrawLine(p, (float)X1, (float)Y1, (float)X2, (float)Y2);
+            } else {
+                mMagnitude *= scale;
+                Paint(g, p);
+                mMagnitude /= scale;
+            }
         }
 
         private void OnChanged() {
@@ -278,7 +355,7 @@ namespace RayCasting {
         public override string ToString() {
             return string.Format("Magnitude: {0:F2}{8}Angle: {1:F2}{8}({2:F2}, {3:F2})-({4:F2}, {5:F2}){8}y = {6:F2}x + {7:F2}",
                                 mMagnitude,
-                                mAngle,
+                                mAngle * Constants.ToDeg,
                                 X1, Y1, X2, Y2,
                                 Slope, X1,
                                 " " + Environment.NewLine

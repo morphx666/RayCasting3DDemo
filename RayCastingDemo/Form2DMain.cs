@@ -1,7 +1,7 @@
-﻿using RayCasting;
+﻿using MorphxLibs;
+using RayCasting;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -97,15 +97,15 @@ namespace RayCastingDemo {
                           ControlStyles.UserPaint, true);
 
             camera = new Particle(this.DisplayRectangle, this.DisplayRectangle.Width / 2, this.DisplayRectangle.Height + 16) {
-                FOV = 80,
+                FOV = 80 * Constants.ToRad,
                 Magnitude = 200.0,
-                Angle = 270.0
+                Angle = 270 * Constants.ToRad
             };
 
             lights.Add(new Particle(this.DisplayRectangle, this.DisplayRectangle.Width - 30, 700) {
-                FOV = 90,
+                FOV = 90 * Constants.ToRad,
                 Magnitude = 1200.0,
-                Angle = 260.0
+                Angle = 260.0 * Constants.ToRad
             });
 
             renderer = new Renderer(camera, walls, lights);
@@ -243,17 +243,17 @@ namespace RayCastingDemo {
         private void ProcessKeys() {
             if((movement & Movements.Forward) == Movements.Forward) MoveCheckCollision(moveMentSpeed);
             if((movement & Movements.Back) == Movements.Back) MoveCheckCollision(-moveMentSpeed);
-            if((movement & Movements.Left) == Movements.Left) camera.Angle -= moveMentSpeed;
-            if((movement & Movements.Right) == Movements.Right) camera.Angle += moveMentSpeed;
+            if((movement & Movements.Left) == Movements.Left) camera.Angle -= moveMentSpeed * Constants.ToRad;
+            if((movement & Movements.Right) == Movements.Right) camera.Angle += moveMentSpeed * Constants.ToRad;
             if((movement & Movements.LookLeft) == Movements.LookLeft) {
-                camera.Angle -= 90;
+                camera.Angle -= Constants.PI90;
                 MoveCheckCollision(moveMentSpeed * 1.2);
-                camera.Angle += 90;
+                camera.Angle += Constants.PI90;
             }
             if((movement & Movements.LookRight) == Movements.LookRight) {
-                camera.Angle += 90;
+                camera.Angle += Constants.PI90;
                 MoveCheckCollision(moveMentSpeed * 1.2);
-                camera.Angle -= 90;
+                camera.Angle -= Constants.PI90;
             }
             UpdateObjects();
         }
@@ -276,7 +276,7 @@ namespace RayCastingDemo {
 
         private void UpdateObjects() {
             lock(camera) {
-                camera.UpdateRays(walls, 0.25);
+                camera.UpdateRays(walls);
                 if(lightsOn) lights.ForEach((l) => l.UpdateRays(walls));
             }
         }

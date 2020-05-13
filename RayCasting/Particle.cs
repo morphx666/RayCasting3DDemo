@@ -1,11 +1,12 @@
-﻿using System;
+﻿using MorphxLibs;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 
 namespace RayCasting {
     public class Particle : Vector {
         private readonly List<Vector> mRays = new List<Vector>();
-        private double mFOV = 170.0;
+        private double mFOV = 170.0 * Constants.ToRad;
         private double mViewDistance = 0;
 
         private RectangleF area;
@@ -30,10 +31,10 @@ namespace RayCasting {
         }
 
         private void UpdateViewDistance() {
-            mViewDistance = (area.Width / 2.0) / Math.Tan((mFOV * Vector.ToRad) / 2.0);
+            mViewDistance = (area.Width / 2.0) / Math.Tan(mFOV / 2.0);
         }
 
-        public void UpdateRays(List<Vector> walls, double precission = 0.25) {
+        public void UpdateRays(List<Vector> walls, double precission = Constants.PI90 / 240) {
             Vector ray;
             Vector minV;
             double minD;
@@ -41,8 +42,8 @@ namespace RayCasting {
 
             mRays.Clear();
 
-            double a1 = Angle - FOV / 2;
-            double a2 = Angle + FOV / 2;
+            double a1 = Angle - FOV / 2.0;
+            double a2 = Angle + FOV / 2.0;
             double s = precission * Math.Sign(a2 - a1);
 
             for(double a = a1; a < a2; a += s) {
@@ -72,7 +73,7 @@ namespace RayCasting {
             }
         }
 
-        public override void Paint(Graphics g, Color c, double w = 2) {
+        public override void Paint(Graphics g, Color c, float w = 2, double scale = 1.0) {
             double a = Angle;
             using(Pen p = new Pen(c, (float)w)) {
                 g.DrawLine(p, X1, Y1, X2, Y2);

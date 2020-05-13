@@ -1,10 +1,8 @@
-﻿using OpenSimplexNoiseSample;
+﻿using MorphxLibs;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Text;
 
 namespace RayCasting {
     public class Renderer {
@@ -54,8 +52,8 @@ namespace RayCasting {
 
                 for(int i = 0; i < camera.Rays.Count; i++) {
                     //p = camera.Rays[i].Magnitude * Math.Cos(camera.Rays[i].AngleRad - camera.AngleRad);
-                    p = (camera.Rays[i].X2 - camera.Rays[i].X1) * camera.AngleRadCos + // https://youtu.be/eOCQfxRQ2pY?t=606
-                        (camera.Rays[i].Y2 - camera.Rays[i].Y1) * camera.AngleRadSin;
+                    p = (camera.Rays[i].X2 - camera.Rays[i].X1) * camera.AngleCos + // https://youtu.be/eOCQfxRQ2pY?t=606
+                        (camera.Rays[i].Y2 - camera.Rays[i].Y1) * camera.AngleSin;
                     //p = camera.Rays[i].Magnitude; // Fish eye effect
 
                     x = i * rw;
@@ -92,8 +90,8 @@ namespace RayCasting {
                 double lastBmpOffset = 0;
 
                 for(int i = 0; i < camera.Rays.Count; i++) {
-                    p = (camera.Rays[i].X2 - camera.Rays[i].X1) * camera.AngleRadCos + // https://youtu.be/eOCQfxRQ2pY?t=606
-                        (camera.Rays[i].Y2 - camera.Rays[i].Y1) * camera.AngleRadSin;
+                    p = (camera.Rays[i].X2 - camera.Rays[i].X1) * camera.AngleCos + // https://youtu.be/eOCQfxRQ2pY?t=606
+                        (camera.Rays[i].Y2 - camera.Rays[i].Y1) * camera.AngleSin;
 
                     x = i * rw;
                     y = Math.Min((r.Height / 28.0) * camera.ViewDistance / p, r.Height);
@@ -161,8 +159,8 @@ namespace RayCasting {
                 double lastBmpOffset = 0;
 
                 for(int i = 0; i < camera.Rays.Count; i++) {
-                    p = (camera.Rays[i].X2 - camera.Rays[i].X1) * camera.AngleRadCos + // https://youtu.be/eOCQfxRQ2pY?t=606
-                        (camera.Rays[i].Y2 - camera.Rays[i].Y1) * camera.AngleRadSin;
+                    p = (camera.Rays[i].X2 - camera.Rays[i].X1) * camera.AngleCos + // https://youtu.be/eOCQfxRQ2pY?t=606
+                        (camera.Rays[i].Y2 - camera.Rays[i].Y1) * camera.AngleSin;
 
                     x = i * rw;
                     y = Math.Min((r.Height / 28.0) * camera.ViewDistance / p, r.Height);

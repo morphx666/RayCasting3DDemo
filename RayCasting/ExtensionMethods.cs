@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MorphxLibs;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 
@@ -25,19 +26,19 @@ namespace RayCasting {
         }
 
         public static void CreateRectangle(this List<Vector> v, double x, double y, double width, double height) {
-            v.Add(Vector.VectorFromPoints(x, y, x + width, y)); // 0:Top
-            v.Add(Vector.VectorFromPoints(x, y, x, y + height)); // 1:Left
+            v.Add(Vector.FromPoints(x, y, x + width, y)); // 0:Top
+            v.Add(Vector.FromPoints(x, y, x, y + height)); // 1:Left
 
-            v.Add(Vector.VectorFromPoints(x + width, y, x + width, y + height)); // 2:Right
-            v.Add(Vector.VectorFromPoints(x, y + height, x + width, y + height)); // 3:Bottom
+            v.Add(Vector.FromPoints(x + width, y, x + width, y + height)); // 2:Right
+            v.Add(Vector.FromPoints(x, y + height, x + width, y + height)); // 3:Bottom
         }
 
         public static void CreateRectangle(this List<Vector> v, Color c, double x, double y, double width, double height) {
-            v.Add(Vector.VectorFromPoints(x, y, x + width, y, c)); // 0:Top
-            v.Add(Vector.VectorFromPoints(x, y, x, y + height, c)); // 1:Left
+            v.Add(Vector.FromPoints(x, y, x + width, y, c)); // 0:Top
+            v.Add(Vector.FromPoints(x, y, x, y + height, c)); // 1:Left
 
-            v.Add(Vector.VectorFromPoints(x + width, y, x + width, y + height, c)); // 2:Right
-            v.Add(Vector.VectorFromPoints(x, y + height, x + width, y + height, c)); // 3:Bottom
+            v.Add(Vector.FromPoints(x + width, y, x + width, y + height, c)); // 2:Right
+            v.Add(Vector.FromPoints(x, y + height, x + width, y + height, c)); // 3:Bottom
         }
 
         // https://www.geeksforgeeks.org/check-whether-given-point-lies-inside-rectangle-not/

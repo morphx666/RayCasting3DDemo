@@ -2,18 +2,18 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
-    <AssemblyVersion>2019.5.13.198</AssemblyVersion>
-    <FileVersion>2019.5.13.198</FileVersion>
+    <AssemblyVersion>2020.4.120.211</AssemblyVersion>
+    <FileVersion>2020.4.120.211</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <OutputPath>D:\Users\Xavier Flix\Dropbox\Projects\RayCastingDemo\Release\</OutputPath>
+    <OutputPath>..\Release\</OutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>D:\Users\Xavier Flix\Dropbox\Projects\RayCastingDemo\Release\</OutputPath>
+    <OutputPath>..\Release\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>

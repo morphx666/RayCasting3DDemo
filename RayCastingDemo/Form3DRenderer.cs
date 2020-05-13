@@ -1,8 +1,7 @@
-﻿using OpenSimplexNoiseSample;
+﻿using MorphxLibs;
 using RayCasting;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
