@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <AssemblyVersion>2020.4.120.167</AssemblyVersion>
-    <FileVersion>2020.4.120.167</FileVersion>
+    <AssemblyVersion>2020.6.160.177</AssemblyVersion>
+    <FileVersion>2020.6.160.177</FileVersion>
     <OutputType>Library</OutputType>
   </PropertyGroup>
 
@@ -18,9 +18,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="MorphxLibs\**" />
+    <EmbeddedResource Remove="MorphxLibs\**" />
+    <None Remove="MorphxLibs\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="System.Drawing.Common" Version="4.7.0" />
   </ItemGroup>
 
-  <Import Project="MorphxLibs\MorphxLibs.projitems" Label="Shared" />
+  <Import Project="..\MorphxLibs\MorphxLibs.projitems" Label="Shared" />
 
 </Project>

@@ -7,12 +7,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RayCasting", "RayCasting\Ra
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RayCastingDemo", "RayCastingDemo\RayCastingDemo.csproj", "{F8EC5E2A-29F0-4B0C-8E5C-956F748D006D}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "MorphxLibs", "RayCasting\MorphxLibs\MorphxLibs.shproj", "{F92EE134-8CB3-455A-9160-841004898E8D}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "MorphxLibs", "MorphxLibs\MorphxLibs.shproj", "{F92EE134-8CB3-455A-9160-841004898E8D}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		RayCasting\MorphxLibs\MorphxLibs.projitems*{94fff0b1-f495-46b6-9eee-da943f6f2d93}*SharedItemsImports = 5
-		RayCasting\MorphxLibs\MorphxLibs.projitems*{f92ee134-8cb3-455a-9160-841004898e8d}*SharedItemsImports = 13
+		MorphxLibs\MorphxLibs.projitems*{94fff0b1-f495-46b6-9eee-da943f6f2d93}*SharedItemsImports = 5
+		MorphxLibs\MorphxLibs.projitems*{f92ee134-8cb3-455a-9160-841004898e8d}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

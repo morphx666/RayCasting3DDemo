@@ -11,10 +11,10 @@ namespace RayCasting {
 
         private RectangleF area;
 
-        public List<Vector> Rays { get { return mRays; } }
+        public List<Vector> Rays { get => mRays; }
 
         public double FOV {
-            get { return mFOV; }
+            get => mFOV;
             set {
                 mFOV = value;
                 UpdateViewDistance();
@@ -22,7 +22,7 @@ namespace RayCasting {
         }
 
         public double ViewDistance {
-            get { return mViewDistance; }
+            get => mViewDistance;
         }
 
         public Particle(RectangleF area, double x, double y) : base(1.0, 0.0, x, y) {
